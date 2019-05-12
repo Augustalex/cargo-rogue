@@ -43,7 +43,7 @@
 <script>
     import gradients from './gradients.js';
 
-    const Speed = 10;
+    const Speed = 5;
 
     export default {
         name: 'app',
@@ -54,15 +54,15 @@
                     name: 'A1'
                 },
                 choices: [
-                    { fromValue: 5, fromName: 'Blue', toValue: 2, toName: 'Red' },
-                    { fromValue: 1, fromName: 'Blue', toValue: 3, toName: 'Food' },
-                    { fromValue: 5, fromName: 'Blue', toValue: 2, toName: 'Gas' }
+                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Red' },
+                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Food' },
+                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Gas' }
                 ],
                 cargo: [
-                    { name: 'Blue', amount: 4 },
-                    { name: 'Red', amount: 4 },
-                    { name: 'Food', amount: 1 },
-                    { name: 'Gas', amount: 2 },
+                    { name: 'Blue', amount: 3 },
+                    { name: 'Red', amount: 3 },
+                    { name: 'Food', amount: 3 },
+                    { name: 'Gas', amount: 3 },
                 ]
             };
         },
@@ -117,13 +117,17 @@
                         toName: currentSpice
                     },
                     {
-                        fromValue: randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
+                        fromValue: nextSpice === 'Red'
+                            ? randomItem([1, 2, 3, 4])
+                            : randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
                         fromName: nextSpice,
                         toValue: randomItem([2, 3, 4, 5, 6, 7, 8]),
                         toName: 'Food'
                     },
                     {
-                        fromValue: randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
+                        fromValue: nextSpice === 'Blue'
+                            ? randomItem([1, 2, 3, 4])
+                            : randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
                         fromName: nextSpice,
                         toValue: randomItem([2, 3, 4, 5, 6, 7, 8]),
                         toName: 'Gas'
@@ -208,11 +212,15 @@
     .choices-pass {
         display: inline-block;
         padding: 0 10px;
-        color: rgba(255, 255, 255, .9);
+        color: rgba(255, 255, 255, .25);
         font-size: 32px;
         cursor: pointer;
         text-decoration: underline;
         user-select: none;
+
+        &:hover {
+            color: rgba(255, 255, 255, .8);
+        }
     }
 
     .choice {
@@ -222,8 +230,9 @@
         justify-content: center;
         width: 150px;
         height: 150px;
-        border: 2px solid rgba(0, 0, 0, 0.2);
-        outline: 1px solid rgba(0, 0, 0, 0.4);
+        /*border: 2px solid rgba(0, 0, 0, 0.4);*/
+        /*outline: 1px solid rgba(0, 0, 0, 0.2);*/
+        box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.08);
         background: rgba(255, 255, 255, .12);
         font-size: 28px;
         font-weight: bold;
@@ -270,9 +279,9 @@
         align-items: center;
         width: 800px;
         margin: 0 auto;
-        background: rgba(255, 255, 255, .05);
-        border: 2px solid rgba(0, 0, 0, 0.2);
-        outline: 1px solid rgba(0, 0, 0, 0.4);
+        /*background: rgba(255, 255, 255, .05);*/
+        /*border: 2px solid rgba(0, 0, 0, 0.2);*/
+        /*outline: 1px solid rgba(0, 0, 0, 0.4);*/
         color: rgba(255, 255, 255, .9);
         user-select: none;
 
