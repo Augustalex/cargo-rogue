@@ -2,12 +2,12 @@
     <div id="app">
         <h1>{{ place.name }}</h1>
         <div v-if="noFoodOrGas" class="lost">
-            <span v-if="noFood">No food left, you will starve.</span>
-            <span v-else-if="noGas">No fuel left, you will run out of food.</span>
+            <span v-if="noFood">You have no food left</span>
+            <span v-else-if="noGas">You drift without fuel</span>
             <button class="lost-rerun" @click="rerun">rerun</button>
         </div>
         <div v-else-if="progress === 100" class="lost">
-            <span>You die of age<br>with {{ blue }} Blue & {{ red }} Red</span>
+            <span>You leave <br>with {{ blue }} Blue & {{ red }} Red</span>
             <button class="lost-rerun" @click="rerun">rerun</button>
         </div>
         <template v-else>
@@ -16,17 +16,24 @@
                     v-for="choice in choices"
                     :class="['choice', {'choice--cannotAfford': cannotAfford(choice),'choice--canAfford': !cannotAfford(choice)}]"
                     @click="choose(choice)">
-                    <div class="choice-to">
+                    <template v-if="choice.toAll">
+                        <div v-for="to, index in choice.toAll">
+                            {{ to.value }} {{ to.name }}{{ index < choice.toAll.length - 1 ? ',' : '' }}
+                        </div>
+                    </template>
+                    <div v-else class="choice-to">
                         {{ choice.toValue }} {{ choice.toName }}
                     </div>
-                    <div class="choice-arrow">↑</div>
-                    <div class="choice-from">
-                        {{ choice.fromValue }} {{ choice.fromName }}
-                    </div>
+                    <template v-if="choice.fromValue > 0">
+                        <div class="choice-arrow">↑</div>
+                        <div class="choice-from">
+                            {{ choice.fromValue }} {{ choice.fromName }}
+                        </div>
+                    </template>
                 </div>
             </div>
             <div class="choices-pass" @click="pass">
-                Pass
+                Move on
             </div>
         </template>
         <div class="cargo-divider"></div>
@@ -54,9 +61,16 @@
                     name: 'A1'
                 },
                 choices: [
-                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Red' },
-                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Food' },
-                    { fromValue: 1, fromName: 'Blue', toValue: 10, toName: 'Gas' }
+                    {
+                        fromValue: 0,
+                        fromName: 'Blue',
+                        toAll: [{ name: 'Red', value: 10 }, { name: 'Blue', value: 10 }]
+                    },
+                    {
+                        fromValue: 0,
+                        fromName: 'Blue',
+                        toAll: [{ name: 'Food', value: 10 }, { name: 'Gas', value: 10 }]
+                    }
                 ],
                 cargo: [
                     { name: 'Blue', amount: 3 },
@@ -93,7 +107,9 @@
             choose(choice) {
                 if (this.canAfford(choice)) {
                     this.cargo.find(i => i.name === choice.fromName).amount -= choice.fromValue;
-                    this.cargo.find(i => i.name === choice.toName).amount += choice.toValue;
+                    for (const to of choice.toAll ? choice.toAll : [{ name: choice.toName, value: choice.toValue }]) {
+                        this.cargo.find(i => i.name === to.name).amount += to.value;
+                    }
 
                     this.nextPlace();
                 }
