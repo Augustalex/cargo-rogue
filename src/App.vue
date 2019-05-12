@@ -44,16 +44,19 @@
         },
         methods: {
             choose(choice) {
-
+                this.place = {
+                    name: []
+                };
             }
         },
-
         mounted() {
-            const items = gradients.length;
-            const index = Math.round(Math.random() * (items - 1));
-            document.querySelector('html').style = gradients[index];
+            document.querySelector('html').style = randomItem(gradients);
         },
         components: {}
+    }
+
+    function randomItem(collection) {
+        return collection[Math.round(Math.random() * (collection.length - 1))];
     }
 </script>
 
@@ -67,7 +70,7 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
-        color: #2c3e50;
+        color: white;
         margin-top: 60px;
     }
 
@@ -85,31 +88,32 @@
         justify-content: center;
         width: 150px;
         height: 150px;
-        border: 2px solid #00004d;
-        outline: 1px solid #000033;
-        background: #4d4d66;
-        color: white;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        outline: 1px solid rgba(0, 0, 0, 0.4);
+        background: rgba(255, 255, 255, .12);
         font-size: 28px;
         font-weight: bold;
         user-select: none;
+        box-sizing: border-box;
+        color: rgba(255, 255, 255, .9);
 
         &:hover {
-            background: #737399;
-            border: 2px solid blue;
-            outline: 1px solid purple;
+            background: rgba(255, 255, 255, .3);
+            border: 2px solid #EEE;
+            outline: 1px solid #AAA;
             cursor: pointer;
-            transform: scale(1.01);
+            color: white;
 
             .choice-arrow {
-                font-size: 130%;
-                top: -20px;
+                font-size: 101%;
+                //top: -18px;
             }
         }
     }
 
     .choice-from {
         font-size: 80%;
-        color: rgba(255, 255, 255, .8);
+        /*color: rgba(255, 255, 255, .8);*/
     }
 
     .choice-arrow {
@@ -127,8 +131,14 @@
         align-items: center;
         width: 800px;
         margin: 0 auto;
-        background: #e4e4f0;
-        border: 1px solid black;
+        background: rgba(255, 255, 255, .05);
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        outline: 1px solid rgba(0, 0, 0, 0.4);
+        color: rgba(255, 255, 255, .9);
+        user-select: none;
+
+        &:hover {
+        }
     }
 
     .cargo-divider {
