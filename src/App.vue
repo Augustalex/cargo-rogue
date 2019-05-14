@@ -1,8 +1,11 @@
 <template>
     <div id="app">
+        <div class="history">
+            <span v-for="entry in history" class="history-entry">{{ entry }}</span>
+        </div>
         <h1>{{ place.name }}</h1>
         <div v-if="noFoodOrGas" class="lost">
-            <span v-if="noFood">You have no food left</span>
+            <span v-if="noFood">You starve</span>
             <span v-else-if="noGas">You drift without fuel</span>
             <button class="lost-rerun" @click="rerun">rerun</button>
         </div>
@@ -50,26 +53,35 @@
 <script>
     import gradients from './gradients.js';
 
-    const Speed = 5;
+    const Speed = 0.5;
 
     export default {
         name: 'app',
         data() {
+            const history = JSON.parse(localStorage.getItem('history') || '[]');
+
             return {
+                history,
                 progress: 0,
-                place: {
-                    name: 'A1'
-                },
+                place: this.randomPlace(),
                 choices: [
                     {
                         fromValue: 0,
                         fromName: 'Blue',
-                        toAll: [{ name: 'Red', value: 10 }, { name: 'Blue', value: 10 }]
+                        toValue: 3,
+                        toName: 'Red'
                     },
                     {
                         fromValue: 0,
                         fromName: 'Blue',
-                        toAll: [{ name: 'Food', value: 10 }, { name: 'Gas', value: 10 }]
+                        toValue: 3,
+                        toName: 'Food'
+                    },
+                    {
+                        fromValue: 0,
+                        fromName: 'Blue',
+                        toValue: 3,
+                        toName: 'Gas'
                     }
                 ],
                 cargo: [
@@ -97,6 +109,14 @@
                 return this.cargo.find(i => i.name === 'Blue').amount;
             }
         },
+        watch: {
+            noFoodOrGas() {
+                if (this.noFoodOrGas) {
+                    this.history.push(this.noFood ? 'No food' : 'No fuel');
+                    this.storeHistory();
+                }
+            }
+        },
         methods: {
             cannotAfford(choice) {
                 return !this.canAfford(choice);
@@ -111,59 +131,80 @@
                         this.cargo.find(i => i.name === to.name).amount += to.value;
                     }
 
-                    this.nextPlace();
+                    this.pass();
                 }
             },
             pass() {
                 this.nextPlace();
+
+                this.cargo.find(i => i.name === 'Food').amount -= 1;
+                this.cargo.find(i => i.name === 'Gas').amount -= 1;
             },
             nextPlace() {
                 this.progress += Speed;
                 const currentSpice = this.choices[0].fromName;
                 const nextSpice = currentSpice === 'Blue' ? 'Red' : 'Blue';
-                this.place = {
+                this.place = this.randomPlace();
+                this.choices = this.randomChoices(nextSpice, currentSpice);
+
+                this.applyRandomGradient();
+            },
+            randomPlace() {
+                return {
                     name: randomItem(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])
                         + randomItem(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'])
                 };
-                this.choices = [
+            },
+            randomChoices(fromSpice, toSpice) {
+                const spiceFromValue = this.red === 0 && this.blue === 0 && Math.random() < .1
+                    ? 0
+                    : randomItem([1, 2, 3, 4, 5, 6, 7, 8]);
+
+                return [
                     {
-                        fromValue: randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
-                        fromName: nextSpice,
-                        toValue: randomItem([2, 3, 4, 5, 6, 7, 8]),
-                        toName: currentSpice
+                        fromValue: spiceFromValue,
+                        fromName: fromSpice,
+                        toValue: spiceFromValue === 0 ? 1 : randomItem([2, 3, 4, 5, 6, 7, 8]),
+                        toName: toSpice
                     },
                     {
-                        fromValue: nextSpice === 'Red'
+                        fromValue: fromSpice === 'Red'
                             ? randomItem([1, 2, 3, 4])
                             : randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
-                        fromName: nextSpice,
+                        fromName: fromSpice,
                         toValue: randomItem([2, 3, 4, 5, 6, 7, 8]),
                         toName: 'Food'
                     },
                     {
-                        fromValue: nextSpice === 'Blue'
+                        fromValue: fromSpice === 'Blue'
                             ? randomItem([1, 2, 3, 4])
                             : randomItem([1, 2, 3, 4, 5, 6, 7, 8]),
-                        fromName: nextSpice,
+                        fromName: fromSpice,
                         toValue: randomItem([2, 3, 4, 5, 6, 7, 8]),
                         toName: 'Gas'
                     }
                 ];
-
-                this.applyRandomGradient();
-
-                this.cargo.find(i => i.name === 'Food').amount -= 1;
-                this.cargo.find(i => i.name === 'Gas').amount -= 1;
             },
             applyRandomGradient() {
                 document.querySelector('html').style = randomItem(gradients);
             },
             rerun() {
                 window.location.reload();
+            },
+            resetHistory() {
+                this.history = [];
+                this.storeHistory();
+            },
+            storeHistory() {
+                localStorage.setItem('history', JSON.stringify(this.history));
             }
         },
         mounted() {
             this.applyRandomGradient();
+
+            window.addEventListener('keydown', event => {
+                if (event.key === '®') this.resetHistory();
+            });
         },
         components: {}
     }
@@ -336,5 +377,26 @@
     .progress-bar {
         height: 100%;
         background: white;
+    }
+
+    .history {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex-wrap: wrap;
+
+        height: 95vh;
+    }
+
+    .history-entry {
+        font-size: 48px;
+        padding-right: 10px;
+        color: rgba(0, 0, 0, .019);
+        z-index: -1;
     }
 </style>
