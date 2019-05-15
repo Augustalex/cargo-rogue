@@ -158,7 +158,7 @@
             randomChoices(fromSpice, toSpice) {
                 const spiceFromValue = this.red === 0 && this.blue === 0 && Math.random() < .1
                     ? 0
-                    : randomItem([1, 2, 3, 4, 5, 6, 7, 8]);
+                    : randomItem([1, 2, 3, 4, 5, 6, 7]);
 
                 return [
                     {
